@@ -6,8 +6,9 @@ const LL linf=~(1LLu<<63u);
 
 using namespace std;
 
-//2019-12 T3
+//
 int main(){
-    
+    ios::sync_with_stdio(false);
+
     return 0;
 }
