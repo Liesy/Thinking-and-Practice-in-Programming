@@ -10,7 +10,7 @@ using namespace std;
 
 //第二次T3测试
 
-int print_num=1;
+int print_num = 1;
 
 struct dateTime {
     int year, month, day, hour, mins, sec;
@@ -96,7 +96,32 @@ public:
         }
     }
 
+    bool moreThanAnHour(dateTime st, dateTime et) {
+        LL sec1 =
+                (LL) st.year * 12 * 30 * 24 * 60 * 60 + (LL) st.month + 30 * 24 * 60 * 60 + (LL) st.day * 24 * 60 * 60 +
+                (LL) st.hour * 3600 + (LL) st.mins * 60 + (LL) st.sec;
+        LL sec2 =
+                (LL) et.year * 12 * 30 * 24 * 60 * 60 + (LL) et.month + 30 * 24 * 60 * 60 + (LL) et.day * 24 * 60 * 60 +
+                (LL) et.hour * 3600 + (LL) et.mins * 60 + (LL) et.sec;
+        if (sec2 - sec1 >= 3600) return true;
+        return false;
+    }
+
     void output() {
+        cout << "Scenario #" << print_num << ":" << endl;
+        print_num++;
+        if (!flag) return;//没有可用时间
+
+        sort(canPlay.begin(), canPlay.end());
+        for (auto &it:canPlay) {
+            if (!moreThanAnHour(it.startTime, it.overTime)) continue;
+            cout << "appointment possible from ";
+            printf("%02d/%02d/%04d %02d:%02d:%02d", it.startTime.month, it.startTime.day, it.startTime.year,
+                   it.startTime.hour, it.startTime.mins, it.startTime.sec);
+            cout << " to ";
+            printf("%02d/%02d/%04d %02d:%02d:%02d\n", it.overTime.month, it.overTime.day, it.overTime.year,
+                   it.overTime.hour, it.overTime.mins, it.overTime.sec);
+        }
     }
 };
 
@@ -108,6 +133,7 @@ int main() {
         cin >> m;
         play game;
         game.init(m);
+        game.output();
     }
     return 0;
 }
