@@ -77,16 +77,18 @@ public:
 
     play() { flag = true; }
 
-    void init(int m) {
+    void init() {
+        int m;
+        scanf("%d", &m);
         while (m--) {
             player p;
             dateTime st, et;
             string s;
-            cin >> p.tasks;
+            scanf("%d",&p.tasks);
             for (int i = 1; i <= p.tasks; i++) {
-                cin >> st.year >> st.month >> st.day >> st.hour >> st.mins >> st.sec;
-                cin >> et.year >> et.month >> et.day >> et.hour >> et.mins >> et.sec;
-                cin >> s;
+                scanf("%d%d%d%d%d%d",&st.year,&st.month,&st.day,&st.hour,&st.mins,&st.sec);
+                scanf("%d%d%d%d%d%d",&et.year,&et.month,&et.day,&et.hour,&et.mins,&et.sec);
+                getline(cin,s);
                 p.beginTime.emplace_back(st);
                 p.endTime.emplace_back(et);
                 times.emplace_back(st);
@@ -186,12 +188,11 @@ public:
 
 int main() {
     ios::sync_with_stdio(false);
-    int t, m;
-    cin >> t;
+    int t;
+    scanf("%d", &t);
     while (t--) {
-        cin >> m;
         play game;
-        game.init(m);
+        game.init();
         game.process();
         game.output();
     }
