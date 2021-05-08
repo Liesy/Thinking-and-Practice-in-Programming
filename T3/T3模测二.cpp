@@ -96,6 +96,66 @@ public:
         }
     }
 
+    bool canplay(dateTime t1, dateTime t2) {
+        int absence = 0;
+        for (auto &it:players)
+            for (int i = 0; i < it.tasks; i++)
+                if (t1 >= it.beginTime[i] && t2 <= it.endTime[i]) {
+                    absence++;
+                    break;
+                }
+        if (absence >= 2) return false;
+        if (players.size() <= 1) return false;
+        if (players.size() == 2 && absence == 1) return false;
+        return true;
+    }
+
+    void merge() {
+        if (meet.empty()) {
+            flag = false;
+            return;;
+        }
+        flag = true;
+        dateTime t1 = meet[0].startTime, t2 = meet[0].overTime;
+        for (int i = 1; i < meet.size(); i++) {
+            if (meet[i].startTime == t2) {
+                t2 = meet[i].overTime;
+                continue;
+            } else {
+                timeSegment ts;
+                ts.startTime = t1, ts.overTime = t2;
+                canPlay.emplace_back(ts);
+                t1 = meet[i].startTime;
+                t2 = meet[i].overTime;
+            }
+        }
+        //最后一段还未处理
+        timeSegment ts;
+        ts.startTime = t1, ts.overTime = t2;
+        canPlay.emplace_back(ts);
+    }
+
+    void process() {
+        dateTime t1(1800, 1, 1, 0, 0, 0), t2(2200, 1, 1, 0, 0, 0);
+        times.emplace_back(t1), times.emplace_back(t2);
+        sort(times.begin(), times.end());
+        //去重
+        times.erase(unique(times.begin(), times.end()), times.end());
+        sort(times.begin(), times.end());
+
+        t1 = times[0];
+        for (int i = 1; i < times.size(); i++) {
+            t2 = times[i];
+            if (canplay(t1, t2)) {
+                timeSegment ts;
+                ts.startTime = t1, ts.overTime = t2;
+                meet.emplace_back(ts);
+            }
+            t1 = t2;
+        }
+        merge();
+    }
+
     bool moreThanAnHour(dateTime st, dateTime et) {
         LL sec1 =
                 (LL) st.year * 12 * 30 * 24 * 60 * 60 + (LL) st.month + 30 * 24 * 60 * 60 + (LL) st.day * 24 * 60 * 60 +
@@ -115,11 +175,10 @@ public:
         sort(canPlay.begin(), canPlay.end());
         for (auto &it:canPlay) {
             if (!moreThanAnHour(it.startTime, it.overTime)) continue;
-            cout << "appointment possible from ";
-            printf("%02d/%02d/%04d %02d:%02d:%02d", it.startTime.month, it.startTime.day, it.startTime.year,
-                   it.startTime.hour, it.startTime.mins, it.startTime.sec);
-            cout << " to ";
-            printf("%02d/%02d/%04d %02d:%02d:%02d\n", it.overTime.month, it.overTime.day, it.overTime.year,
+            printf("appointment possible from %02d/%02d/%04d %02d:%02d:%02d to %02d/%02d/%04d %02d:%02d:%02d\n",
+                   it.startTime.month, it.startTime.day, it.startTime.year,
+                   it.startTime.hour, it.startTime.mins, it.startTime.sec, it.overTime.month, it.overTime.day,
+                   it.overTime.year,
                    it.overTime.hour, it.overTime.mins, it.overTime.sec);
         }
     }
@@ -133,6 +192,7 @@ int main() {
         cin >> m;
         play game;
         game.init(m);
+        game.process();
         game.output();
     }
     return 0;
