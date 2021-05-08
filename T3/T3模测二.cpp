@@ -15,9 +15,7 @@ int print_num = 1;
 struct dateTime {
     int year, month, day, hour, mins, sec;
 
-    dateTime() {}
-
-    dateTime(int yy, int mm, int dd, int hh, int mi, int ss)
+    dateTime(int yy=0, int mm=0, int dd=0, int hh=0, int mi=0, int ss=0)
             : year(yy), month(mm), day(dd), hour(hh), mins(mi), sec(ss) {}
 
     ////以下对操作符的重载参考https://blog.csdn.net/weixin_44552961/article/details/106392927
@@ -160,10 +158,10 @@ public:
 
     bool moreThanAnHour(dateTime st, dateTime et) {
         LL sec1 =
-                (LL) st.year * 12 * 30 * 24 * 60 * 60 + (LL) st.month + 30 * 24 * 60 * 60 + (LL) st.day * 24 * 60 * 60 +
+                (LL) st.year * 12 * 30 * 24 * 60 * 60 + (LL) st.month * 30 * 24 * 60 * 60 + (LL) st.day * 24 * 60 * 60 +
                 (LL) st.hour * 3600 + (LL) st.mins * 60 + (LL) st.sec;
         LL sec2 =
-                (LL) et.year * 12 * 30 * 24 * 60 * 60 + (LL) et.month + 30 * 24 * 60 * 60 + (LL) et.day * 24 * 60 * 60 +
+                (LL) et.year * 12 * 30 * 24 * 60 * 60 + (LL) et.month * 30 * 24 * 60 * 60 + (LL) et.day * 24 * 60 * 60 +
                 (LL) et.hour * 3600 + (LL) et.mins * 60 + (LL) et.sec;
         if (sec2 - sec1 >= 3600) return true;
         return false;
@@ -187,7 +185,6 @@ public:
 };
 
 int main() {
-    ios::sync_with_stdio(false);
     int t;
     scanf("%d", &t);
     while (t--) {
