@@ -37,7 +37,10 @@ Cursor cursorNow;//当前光标位置
 Cursor cursorRec;//记录点的光标位置
 bool shift = false;//粘滞
 
-bool atColEnd(Cursor cur) {
+bool atEnd(Cursor cur) {
+    if (cur.column == txt[cur.row].size())
+        return true;
+    return false;
 }
 
 void move() {
@@ -70,16 +73,16 @@ void move() {
             return;
         if (cursorNow.column == 0) {
             cursorNow.row--;
-            cursorNow.column = txt[cursorNow.row].size() - 1;
+            cursorNow.column = txt[cursorNow.row].size();
             return;
         }
         cursorNow.column--;
         return;
     }
     if (option2 == "Right") {
-        if (cursorNow.row == end_index && cursorNow.column == txt[end_index].size() - 1)
+        if (cursorNow.row == end_index && atEnd(cursorNow))
             return;
-        if (cursorNow.column == txt[cursorNow.row].size() - 1) {
+        if (atEnd(cursorNow)) {
             cursorNow.row++;
             cursorNow.column = 0;
             return;
@@ -91,22 +94,31 @@ void move() {
 
 void insert() {
     if (option2 == "Char") {
-        txt[cursorNow.row].insert(cursorNow.column, 1, ch);
+        if (atEnd(cursorNow))
+            txt[cursorNow.row].push_back(ch);
+        else
+            txt[cursorNow.row].insert(cursorNow.column, 1, ch);
         return;
     }
     if (option2 == "Enter") {
-        //截断
-        str = txt[cursorNow.row].substr(cursorNow.column);
-        txt[cursorNow.row] = txt[cursorNow.row].substr(0, cursorNow.column);
         //全部后移
         end_index++;
         auto it = begin(txt);
         copy_backward(it + cursorNow.row + 1, it + end_index, it + end_index);
-        //换行
-        txt[cursorNow.row + 1] = str;
+        if (!atEnd(cursorNow)) {
+            //截断
+            str = txt[cursorNow.row].substr(cursorNow.column);
+            txt[cursorNow.row] = txt[cursorNow.row].substr(0, cursorNow.column);
+            //换行
+            txt[cursorNow.row + 1] = str;
+        }
         return;
     }
     if (option2 == "Space") {
+        if (atEnd(cursorNow))
+            txt[cursorNow.row].push_back(' ');
+        else
+            txt[cursorNow.row].insert(cursorNow.column, 1, ' ');
         return;
     }
     if (option2 == "Paste") {
