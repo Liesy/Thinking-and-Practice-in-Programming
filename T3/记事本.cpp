@@ -32,7 +32,7 @@ struct paste {//粘贴板
 };
 
 string txt[maxn];//记事本
-int end_index;//最后一行的索引
+int end_index = 1;//最后一行的索引
 Cursor cursorNow;//当前光标位置
 Cursor cursorRec;//记录点的光标位置
 bool shift = false;//粘滞
@@ -98,6 +98,7 @@ void insert() {
             txt[cursorNow.row].push_back(ch);
         else
             txt[cursorNow.row].insert(cursorNow.column, 1, ch);
+        cursorNow.column++;
         return;
     }
     if (option2 == "Enter") {
@@ -105,13 +106,17 @@ void insert() {
         end_index++;
         auto it = begin(txt);
         copy_backward(it + cursorNow.row + 1, it + end_index, it + end_index);
+        txt[cursorNow.row + 1].clear();
         if (!atEnd(cursorNow)) {
             //截断
             str = txt[cursorNow.row].substr(cursorNow.column);
-            txt[cursorNow.row] = txt[cursorNow.row].substr(0, cursorNow.column);
             //换行
             txt[cursorNow.row + 1] = str;
+            //同
+            str = txt[cursorNow.row].substr(0, cursorNow.column);
+            txt[cursorNow.row] = str;
         }
+        cursorNow.row++, cursorNow.column = 0;
         return;
     }
     if (option2 == "Space") {
@@ -119,9 +124,42 @@ void insert() {
             txt[cursorNow.row].push_back(' ');
         else
             txt[cursorNow.row].insert(cursorNow.column, 1, ' ');
+        cursorNow.column++;
         return;
     }
     if (option2 == "Paste") {
+        return;
+    }
+}
+
+void remove() {
+    if (option2 == "Del") {
+        if (atEnd(cursorNow)) {
+            if (cursorNow.row == end_index)
+                return;
+            txt[cursorNow.row] += txt[cursorNow.row + 1];
+            auto it_begin = begin(txt), it_end = end(txt);
+            end_index--;
+            copy_backward(it_begin + cursorNow.row + 2, it_end + 1, it_begin + end_index);
+            txt[end_index + 1].clear();
+            return;
+        }
+        txt[cursorNow.row].erase(cursorNow.column, 1);
+        return;
+    }
+    if (option2 == "Backspace") {
+        if (cursorNow.column == 0) {
+            if (cursorNow.row == 1)
+                return;
+            int r = cursorNow.row - 1;
+            txt[r] += txt[cursorNow.row];
+            auto it_begin = begin(txt), it_end = end(txt);
+            end_index--;
+            copy_backward(it_begin + cursorNow.row + 1, it_end + 1, it_begin + end_index);
+            txt[end_index + 1].clear();
+            return;
+        }
+        txt[cursorNow.row].erase(cursorNow.column - 1, 1);
         return;
     }
 }
@@ -140,11 +178,15 @@ int main() {
                 cin >> ch;
             insert();
         } else if (option1 == "REMOVE") {
+            cin >> option2;
+            remove();
         } else if (option1 == "SHIFT") {
         } else if (option1 == "FIND") {
         } else if (option1 == "COUNT") {
         } else if (option1 == "COPY") {
         } else if (option1 == "PRINT") {
+            for (int i = 1; i <= end_index; i++)
+                cout << txt[i] << '\n';
         }
     }
     return 0;
