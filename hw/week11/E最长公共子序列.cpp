@@ -5,11 +5,11 @@
 typedef long long ll;
 const int maxn = 5010;
 const int inf = ~(1u << 31u);
-const ll linf = ~(1LLu << 63u);
+const ll linf = ~(1llu << 63u);
 
 using namespace std;
 
-//第十周作业 E LCS问题
+//第十一周作业 E LCS问题
 int n, m;
 int a[maxn], b[maxn], f[maxn][maxn];
 

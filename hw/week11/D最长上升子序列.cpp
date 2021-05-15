@@ -5,7 +5,7 @@
 typedef long long ll;
 const int maxn = 1000010;
 const int inf = ~(1u << 31u);
-const ll linf = ~(1LLu << 63u);
+const ll linf = ~(1llu << 63u);
 
 using namespace std;
 
