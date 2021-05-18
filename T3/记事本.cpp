@@ -61,7 +61,7 @@ void move() {
         return;
     }
     if (option2 == "Down") {
-        if (cursorNow.row == end_index)
+        if (cursorNow.row >= end_index)
             return;
         cursorNow.row++;
         if (txt[cursorNow.row].size() < cursorNow.column)
@@ -80,7 +80,7 @@ void move() {
         return;
     }
     if (option2 == "Right") {
-        if (cursorNow.row == end_index && atEnd(cursorNow))
+        if (cursorNow.row >= end_index && atEnd(cursorNow))
             return;
         if (atEnd(cursorNow)) {
             cursorNow.row++;
@@ -94,6 +94,8 @@ void move() {
 
 void insert() {
     if (option2 == "Char") {
+        if (cursorNow.row > end_index)
+            end_index = cursorNow.row;
         if (atEnd(cursorNow))
             txt[cursorNow.row].push_back(ch);
         else
@@ -102,10 +104,14 @@ void insert() {
         return;
     }
     if (option2 == "Enter") {
+        if (cursorNow.row >= end_index && atEnd(cursorNow)) {//在文章末尾
+            cursorNow.row++;
+            cursorNow.column = 0;
+            return;
+        }
         //全部后移
         end_index++;
-        auto it = begin(txt);
-        copy_backward(it + cursorNow.row + 1, it + end_index, it + end_index);
+        for (int i = end_index - 1; i >= cursorNow.row + 1; i--) txt[i + 1] = txt[i];
         txt[cursorNow.row + 1].clear();
         if (!atEnd(cursorNow)) {
             //截断
@@ -120,6 +126,8 @@ void insert() {
         return;
     }
     if (option2 == "Space") {
+        if (cursorNow.row > end_index)
+            end_index = cursorNow.row;
         if (atEnd(cursorNow))
             txt[cursorNow.row].push_back(' ');
         else
@@ -135,12 +143,11 @@ void insert() {
 void remove() {
     if (option2 == "Del") {
         if (atEnd(cursorNow)) {
-            if (cursorNow.row == end_index)
+            if (cursorNow.row >= end_index)
                 return;
             txt[cursorNow.row] += txt[cursorNow.row + 1];
-            auto it_begin = begin(txt), it_end = end(txt);
             end_index--;
-            copy_backward(it_begin + cursorNow.row + 2, it_end + 1, it_begin + end_index);
+            for (int i = cursorNow.row + 1; i <= end_index; i++) txt[i] = txt[i + 1];
             txt[end_index + 1].clear();
             return;
         }
@@ -148,18 +155,25 @@ void remove() {
         return;
     }
     if (option2 == "Backspace") {
+        if (cursorNow.row > end_index && atEnd(cursorNow)) {//在文章末尾
+            cursorNow.row--;
+            if (cursorNow.row == end_index)
+                cursorNow.column = txt[cursorNow.row].size();
+            return;
+        }
         if (cursorNow.column == 0) {
             if (cursorNow.row == 1)
                 return;
-            int r = cursorNow.row - 1;
-            txt[r] += txt[cursorNow.row];
-            auto it_begin = begin(txt), it_end = end(txt);
+            cursorNow.row--;
+            cursorNow.column = txt[cursorNow.row].size();
+            txt[cursorNow.row] += txt[cursorNow.row + 1];
             end_index--;
-            copy_backward(it_begin + cursorNow.row + 1, it_end + 1, it_begin + end_index);
+            for (int i = cursorNow.row + 1; i <= end_index; i++) txt[i] = txt[i + 1];
             txt[end_index + 1].clear();
             return;
         }
         txt[cursorNow.row].erase(cursorNow.column - 1, 1);
+        cursorNow.column--;
         return;
     }
 }
@@ -187,6 +201,7 @@ int main() {
         } else if (option1 == "PRINT") {
             for (int i = 1; i <= end_index; i++)
                 cout << txt[i] << '\n';
+            cout << '\n';
         }
     }
     return 0;
