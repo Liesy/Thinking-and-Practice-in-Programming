@@ -4,10 +4,6 @@
 
 typedef long long ll;
 const int maxn = 50;
-const int max_int = ~(1u << 31u);
-const int min_int = (1u << 31u);
-const ll max_ll = ~(1llu << 63u);
-const ll min_ll = (1llu << 63u);
 
 using namespace std;
 
@@ -15,7 +11,7 @@ using namespace std;
 int n;
 ll v, res = 0;
 ll w[maxn], c[maxn];
-pair<ll, ll> pa[1 << maxn / 2];
+pair<ll, ll> pa[1 << (40 / 2 + 2)];
 
 int main(){
     ios::sync_with_stdio(false);
@@ -27,7 +23,7 @@ int main(){
     for (int i = 0; i < 1 << mid; i++){
         ll sw = 0, sc = 0;
         for (int j = 0; j < mid; j++)
-            if (i >> j & 1){
+            if ((i >> j) & 1){
                 sw += w[j];
                 sc += c[j];
             }
@@ -43,13 +39,13 @@ int main(){
     //求解
     for (int i = 0; i < 1 << (n - mid); i++){
         ll sw = 0, sc = 0;
-        for (int j = 0; j < n - mid; j++)
-            if (j >> i & 1){
+        for (int j = 0; j < (n - mid); j++)
+            if ((i >> j) & 1){
                 sw += w[mid + j];
                 sc += c[mid + j];
             }
         if (sw <= v){
-            ll temp = (lower_bound(pa, pa + v, make_pair(v - sw, max_ll)) - 1)->second;
+            ll temp = (lower_bound(pa, pa + index, make_pair(v - sw, LONG_LONG_MAX)) - 1)->second;
             res = max(res, sc + temp);
         }
     }
