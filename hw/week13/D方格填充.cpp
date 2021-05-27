@@ -17,19 +17,19 @@ bool s[1 << maxn];
 int main(){
     ios::sync_with_stdio(false);
     cin >> h >> w;
-    for (int i = 0; i < 1 << w; i++){
+    for (int i = 0; i < 1 << h; i++){
         int cnt = 0;
         s[i] = true;
-        for (int j = 0; j < w; j++)
+        for (int j = 0; j < h; j++)
             if (i >> j & 1) { if (cnt & 1) s[i] = false; }
             else cnt++;
         if (cnt & 1) s[i] = false;
     }
     mem(f, 0);
     f[0][0] = 1;
-    for (int i = 1; i <= h; i++)
-        for (int j = 0; j < 1 << w; j++)
-            for (int k = 0; k < 1 << w; k++)
+    for (int i = 1; i <= w; i++)
+        for (int j = 0; j < 1 << h; j++)
+            for (int k = 0; k < 1 << h; k++)
                 if ((j & k) == 0 && (s[j | k]))
                     f[i][j] += f[i - 1][k];
     cout << f[w][0] << '\n';
