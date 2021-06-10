@@ -34,10 +34,10 @@ int n, m;
 
 struct raceRecord{
     string YYYYMMDD;
-    int start;
-    int end;
+    string start;
+    string end;
     float l;
-    int pause;
+    string pause;
     int s;
 };
 
@@ -47,15 +47,20 @@ map<ll,char> stuGender;//学号-性别
 map<ll,int> stuCounts;//学号-到课次数
 map<ll,vector<raceRecord>> stuRace;//学号-日常长跑记录
 
-int raceScore(char gen, string ss){//返回期末长跑测试成绩
-    int min, sec;
+int split(string ss){//返回时间字符串对应的总秒数
+    vector<int> res;
     int temp = 0;
     for (auto &x: ss){
-        if (x == '\'') min = temp, temp = 0;//遇到分隔符
-        else temp = 10 * temp + x - '0';
+        if (x >= '0' && x <= '9') temp = 10 * temp + x - '0';
+        else res.emplace_back(temp), temp = 0;
     }
-    sec = temp;
-    int times = 60 * min + sec;
+    int ret = 0;
+    for (auto &x: res) ret = 60 * ret + x;
+    return ret;
+}
+
+int raceScore(char gen, string ss){//返回期末长跑测试成绩
+    int times = split(ss);
     if (gen == 'M'){//男生
         if (times > 18 * 60) return 0;
         else if (times > 17 * 60 + 10) return 2;
@@ -84,29 +89,29 @@ int raceScore(char gen, string ss){//返回期末长跑测试成绩
     }
 }
 
-int split(string ss, char c){//返回时间字符串对应的总秒数
-    int res = 0, temp = 0;
-    for (auto &x: ss){
-        if (x == c || x == '\"') res += 60 * temp, temp = 0;//遇到分隔符
-        else temp = 10 * temp + x - '0';
-    }
-    res += temp;
-    return res;
+bool preJudge(ll sp, raceRecord rr){
+    int startTime = split(rr.start), endTime = split(rr.end);
+    float miles = rr.l * 1000;
+    int pauseTime = split(rr.pause);
+    if (stuGender[sp] == 'M' && miles < 3000.0) return false;
+    if (stuGender[sp] == 'F' && miles < 1500.0) return false;
+    if (miles / (endTime - startTime) < 2 || miles / (endTime - startTime) > 5) return false;
+    if (pauseTime > 4 * 60 + 30) return false;
+    if (miles / (rr.s * 1.0) > 1.5) return false;
+    return true;
 }
 
-bool judge(ll sp, raceRecord rr){//判断该条日常长跑记录是否合法
-    if ((stuGender[sp] == 'M' && rr.l < 3.0) || (stuGender[sp] == 'F' && rr.l < 1.5)) return false;
-    float v = (rr.l * 1000) / (rr.end - rr.start);
-    if (v > 5.0 || v < 2.0) return false;
-    if (rr.pause > 4 * 60 + 30) return false;
-    float step = (rr.l * 1000) / rr.s;
-    if (step > 1.5) return false;
-    if (stuRace[sp].empty()) return true;
-    auto r_pre = stuRace[sp].end();//最后一条合法记录
-    if (rr.YYYYMMDD != (*r_pre).YYYYMMDD) return true;
-    int gap = rr.start - (*r_pre).end;
-    if (gap < 6) return false;
-    return true;
+int countRace(ll sp){//统计合法的长跑次数
+    int index = 1;
+    while (stuRace[sp].size() > 1 && index < stuRace[sp].size()){
+        if (stuRace[sp][index].YYYYMMDD == stuRace[sp][index - 1].YYYYMMDD){
+            int nowStart = split(stuRace[sp][index].start), preEnd = split(stuRace[sp][index - 1].end);
+            if (nowStart - preEnd < 6 * 60 * 60) stuRace[sp].erase(stuRace[sp].begin() + index);
+            else index++;
+        }
+        else index++;
+    }
+    return stuRace[sp].size();
 }
 
 void output(){
@@ -149,16 +154,13 @@ int main(){
     for (int i = 1; i <= m; i++){
         ll p;
         raceRecord r;
-        string t1, t2, t3;
-        cin >> r.YYYYMMDD >> p >> t1 >> t2 >> r.l >> t3 >> r.s;
-        r.start = split(t1, ':'), r.end = split(t2, ':');
-        r.pause = split(t3, '\'');
-        if (judge(p, r)) stuRace[p].emplace_back(r);
+        cin >> r.YYYYMMDD >> p >> r.start >> r.end >> r.l >> r.pause >> r.s;
+        r.start += ":", r.end += ":";
+        if (preJudge(p, r)) stuRace[p].emplace_back(r);
     }
     //处理日常长跑分数
     for (auto &x: stuRace){
-        if (x.second.empty()) continue;
-        int num = x.second.size();
+        int num = countRace(x.first);
         stuCounts[x.first] += num;
         if (num >= 21) stu[x.first] += 10;
         else if (num >= 19) stu[x.first] += 9;
@@ -185,7 +187,7 @@ int main(){
 
 /*
 1
-2015011233 M 34 14'30 P 3 3
+2015011233 M 34 14'30" P 3 3
 8
 20210508 2015011233 17:02:33 17:19:33 2.99 0'0 3333
 20210509 2015011233 17:12:15 17:38:46 3.01 2'3 4300
